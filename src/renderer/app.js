@@ -646,6 +646,13 @@ function bindEvents() {
     }
   });
 
+  /* Двойной клик по проекту открывает переименование (помимо кнопки-карандаша) */
+  $('#project-list').addEventListener('dblclick', (e) => {
+    if (e.target.closest('[data-action]')) return; // клик по кнопке — не редактируем
+    const item = e.target.closest('.project-item');
+    if (item) renameProject(item.dataset.projectId);
+  });
+
   $('#task-list').addEventListener('click', (e) => {
     const btn = e.target.closest('[data-action]');
     if (!btn) return;
@@ -659,6 +666,13 @@ function bindEvents() {
       case 'edit-task': editTask(id); break;
       case 'delete-task': deleteTask(id); break;
     }
+  });
+
+  /* Двойной клик по карточке задачи открывает её редактирование */
+  $('#task-list').addEventListener('dblclick', (e) => {
+    if (e.target.closest('[data-action]')) return; // клик по кнопке — не редактируем
+    const item = e.target.closest('.task-card');
+    if (item) editTask(item.dataset.taskId);
   });
 
   $('#timer-pause-btn').addEventListener('click', () => {

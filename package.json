@@ -1,6 +1,6 @@
 {
   "name": "vaskotick",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "VaskoTick — учёт рабочего времени: проекты, задачи, таймер, отчёты",
   "main": "src/main/main.js",
   "license": "MIT",
