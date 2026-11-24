@@ -94,7 +94,7 @@ function startTimer(taskId) {
     if (state.timer.taskId === taskId) return;
     confirmModal(
       'Сменить задачу?',
-      'Сейчас идёт таймер по другой задаче. Остановить его и начать новый?',
+      'Переключить таймер на другую задачу',
       'Да, переключить'
     ).then((ok) => {
       if (!ok) return;
@@ -414,7 +414,7 @@ function renderTasks() {
           ${t.tags?.length ? `<div class="task-tags">${t.tags.map((tag) => `<span class="tag">${esc(tag)}</span>`).join('')}</div>` : ''}
         </div>
         <div class="task-total">
-          <div class="total-value" data-total-for="${t.id}">${fmtHuman(total)}</div>
+          <div class="total-value" data-total-for="${t.id}">${fmtHMS(total)}</div>
           <div class="total-sub">${nSessions} ${plural(nSessions, 'сессия', 'сессии', 'сессий')}</div>
         </div>
         <div class="task-actions">
@@ -472,12 +472,12 @@ function renderReports() {
     if (!rows.length && ui.reportPeriod !== 'all') continue;
 
     html += `<div class="report-project">
-      <div class="report-project-head"><span>${esc(p.name)}</span><span class="sum">${fmtHuman(pTotal)}</span></div>
-      ${rows.map((r) => `<div class="report-task-row"><span>${esc(r.name)}</span><span class="sum">${fmtHuman(r.sum)}</span></div>`).join('')}
+      <div class="report-project-head"><span>${esc(p.name)}</span><span class="sum">${fmtHMS(pTotal)}</span></div>
+      ${rows.map((r) => `<div class="report-task-row"><span>${esc(r.name)}</span><span class="sum">${fmtHMS(r.sum)}</span></div>`).join('')}
     </div>`;
   }
 
-  html += `<div class="report-grand"><span>Итого за период</span><span class="sum">${fmtHuman(grandTotal)}</span></div>`;
+  html += `<div class="report-grand"><span>Итого за период</span><span class="sum">${fmtHMS(grandTotal)}</span></div>`;
 
   const sorted = [...sessions].sort((a, b) => b.start - a.start).slice(0, 100);
   html += '<h3 class="sessions-title">Сессии за период</h3>';
@@ -486,8 +486,8 @@ function renderReports() {
   } else {
     html += sorted.map((s) => {
       const dur = s.manual
-        ? `${s.durationMs < 0 ? '−' : '+'}${fmtHuman(Math.abs(s.durationMs))}`
-        : fmtHuman(s.durationMs);
+        ? `${s.durationMs < 0 ? '−' : '+'}${fmtHMS(Math.abs(s.durationMs))}`
+        : fmtHMS(s.durationMs);
       const when = s.manual ? fmtDateTime(s.start) : `${fmtDate(s.start)} ${fmtTime(s.start)}–${fmtTime(s.end)}`;
       return `<div class="session-row">
         <span class="when">${when}</span>
@@ -736,7 +736,7 @@ function tick() {
   if (state.timer && !state.timer.paused) {
     $('#timer-elapsed').textContent = fmtHMS(timerElapsedMs());
     const totalEl = $(`[data-total-for="${state.timer.taskId}"]`);
-    if (totalEl) totalEl.textContent = fmtHuman(taskTotalMs(state.timer.taskId) + timerElapsedMs());
+    if (totalEl) totalEl.textContent = fmtHMS(taskTotalMs(state.timer.taskId) + timerElapsedMs());
     autosaveCounter++;
     if (autosaveCounter % 10 === 0) storage.save(state); // защита от потери таймера
   }
