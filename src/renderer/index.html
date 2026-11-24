@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VaskoTick</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 2h6"/></svg>
+      <span>VaskoTick</span>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-view="tasks" role="tab">Задачи</button>
+      <button class="tab" data-view="reports" role="tab">Отчёты</button>
+    </nav>
+    <label class="autostart" id="autostart-wrap" hidden title="Запускать приложение при входе в Windows">
+      <input type="checkbox" id="autostart-toggle" />
+      Автозапуск
+    </label>
+    <button class="btn btn-ghost" id="btn-export" title="Выгрузить данные в текстовый файл">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Экспорт в TXT
+    </button>
+  </header>
+
+  <div id="timer-bar" class="timer-bar" hidden>
+    <span class="timer-dot" aria-hidden="true"></span>
+    <span class="timer-task" id="timer-task-name"></span>
+    <span class="timer-elapsed" id="timer-elapsed">00:00:00</span>
+    <button class="btn btn-sm" id="timer-pause-btn"></button>
+    <button class="btn btn-sm btn-danger-ghost" id="timer-stop-btn">Стоп</button>
+  </div>
+
+  <main id="view-tasks" class="view">
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <h2>Проекты</h2>
+        <button class="btn btn-sm btn-primary" id="btn-add-project">+ Проект</button>
+      </div>
+      <ul id="project-list" class="project-list"></ul>
+      <p id="projects-empty" class="empty-hint" hidden>Проектов пока нет.<br/>Создайте первый — задачи живут внутри проектов.</p>
+    </aside>
+
+    <section class="content">
+      <div class="content-head">
+        <h2 id="current-project-name">Задачи</h2>
+        <button class="btn btn-sm btn-primary" id="btn-add-task" disabled>+ Задача</button>
+      </div>
+      <ul id="task-list" class="task-list"></ul>
+      <p id="tasks-empty" class="empty-hint" hidden></p>
+    </section>
+  </main>
+
+  <main id="view-reports" class="view view-reports" hidden>
+    <div class="reports-head">
+      <h2>Отчёты</h2>
+      <div class="period-switch" role="tablist">
+        <button class="chip active" data-period="today">Сегодня</button>
+        <button class="chip" data-period="week">Неделя</button>
+        <button class="chip" data-period="month">Месяц</button>
+        <button class="chip" data-period="all">Всё время</button>
+      </div>
+    </div>
+    <div id="report-body"></div>
+  </main>
+
+  <div id="modal-root"></div>
+  <div id="toast-root" class="toast-root"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
