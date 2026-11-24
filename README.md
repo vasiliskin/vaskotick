@@ -2,7 +2,7 @@
 
 Простая утилита учёта рабочего времени для Windows: проекты → задачи → таймер → отчёты.
 
-![платформа](https://img.shields.io/badge/platform-Windows-blue) ![лицензия](https://img.shields.io/badge/license-MIT-green)
+![платформа](https://img.shields.io/badge/platform-Windows-blue) ![лицензия](https://img.shields.io/badge/license-MIT-green) [![релиз](https://img.shields.io/github/v/release/vasiliskin/vaskotick)](https://github.com/vasiliskin/vaskotick/releases/latest) [![Release build](https://github.com/vasiliskin/vaskotick/actions/workflows/release.yml/badge.svg)](https://github.com/vasiliskin/vaskotick/actions/workflows/release.yml) [![Dev build](https://github.com/vasiliskin/vaskotick/actions/workflows/build.yml/badge.svg)](https://github.com/vasiliskin/vaskotick/actions/workflows/build.yml)
 
 ## Возможности
 
