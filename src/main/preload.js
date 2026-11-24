@@ -9,6 +9,7 @@ contextBridge.exposeInMainWorld('tt', {
   notifyTimer: (state) => ipcRenderer.send('timer:state', state),
   getAutostart: () => ipcRenderer.invoke('autostart:get'),
   setAutostart: (enabled) => ipcRenderer.invoke('autostart:set', enabled),
+  getVersion: () => ipcRenderer.invoke('app:version'),
   onTimerCommand: (callback) => {
     ipcRenderer.on('timer:command', (_event, cmd) => callback(cmd));
   },

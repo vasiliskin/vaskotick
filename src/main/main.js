@@ -25,6 +25,8 @@ function sendCommand(cmd) {
 
 function buildTrayMenu() {
   const items = [];
+  items.push({ label: `VaskoTick v${app.getVersion()}`, enabled: false });
+  items.push({ type: 'separator' });
   if (timerState.active) {
     items.push({ label: `${timerState.label || 'Идёт таймер'}`, enabled: false });
     items.push({
@@ -269,6 +271,9 @@ if (!gotLock) {
       timerState = state || { active: false };
       updateTray();
     });
+
+    /* Версия приложения для отображения в интерфейсе */
+    ipcMain.handle('app:version', () => app.getVersion());
 
     /* Автозапуск с Windows (только для установленной/portable-сборки) */
     ipcMain.handle('autostart:get', () => {

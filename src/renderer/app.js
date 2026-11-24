@@ -765,6 +765,18 @@ async function init() {
     ui.selectedProjectId = state.projects[0].id;
   }
 
+  /* Версия приложения в шапке (в браузерном предпросмотре — «dev») */
+  const versionEl = $('#app-version');
+  if (isElectron && typeof window.tt.getVersion === 'function') {
+    window.tt.getVersion().then((v) => {
+      versionEl.textContent = `v${v}`;
+      versionEl.hidden = false;
+    });
+  } else {
+    versionEl.textContent = 'dev';
+    versionEl.hidden = false;
+  }
+
   bindEvents();
   renderAll();
   setInterval(tick, 1000);
