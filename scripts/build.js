@@ -15,6 +15,9 @@ builder
       electronDist: 'node_modules/electron/dist', // локальный проверенный дистрибутив
       files: ['src/**/*', 'assets/tray.png', 'assets/icon.png'],
       directories: { output: 'release' },
+      // Источник автообновлений; с publish:'never' ничего не заливается,
+      // но генерируется release/latest.yml для electron-updater.
+      publish: [{ provider: 'github', owner: 'vasiliskin', repo: 'vaskotick' }],
       win: {
         target: ['portable', 'nsis'],
         icon: 'assets/icon.ico',

@@ -1,6 +1,6 @@
 {
   "name": "vaskotick",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "VaskoTick — учёт рабочего времени: проекты, задачи, таймер, отчёты",
   "main": "src/main/main.js",
   "license": "MIT",
@@ -9,36 +9,6 @@
     "start": "node scripts/start.js",
     "dist": "node scripts/build.js"
   },
-  "build": {
-    "appId": "com.worktime.tracker",
-    "productName": "Worktime Tracker",
-    "files": [
-      "main.js",
-      "preload.js",
-      "start.js",
-      "renderer/**/*"
-    ],
-    "directories": {
-      "output": "release"
-    },
-    "win": {
-      "target": [
-        "portable",
-        "nsis"
-      ],
-      "icon": "build/icon.ico"
-    },
-    "portable": {
-      "artifactName": "WorktimeTracker-1.0.0-Portable.exe"
-    },
-    "nsis": {
-      "oneClick": false,
-      "perMachine": false,
-      "allowToChangeInstallationDirectory": true,
-      "shortcutName": "Worktime Tracker",
-      "artifactName": "WorktimeTracker-1.0.0-Setup.exe"
-    }
-  },
   "devDependencies": {
     "electron": "^33.4.11",
     "electron-builder": "^26.18.0"
@@ -46,5 +16,8 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/vasiliskin/vaskotick.git"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.11"
   }
 }

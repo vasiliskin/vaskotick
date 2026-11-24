@@ -37,6 +37,7 @@ function buildTrayMenu() {
   }
   items.push({ type: 'separator' });
   items.push({ label: 'Показать окно', click: showWindow });
+  items.push({ label: 'Проверить обновления…', click: () => checkForUpdates(true) });
   items.push({
     label: 'Выход',
     click: () => {
@@ -54,6 +55,118 @@ function updateTray() {
     ? `VaskoTick — ${timerState.label || ''}`
     : 'VaskoTick — таймер не запущен';
   tray.setToolTip(tip.slice(0, 120));
+}
+
+/* ---------- Автообновление (только установленная версия) ---------- */
+
+const UPDATE_CHECK_INTERVAL_MS = 4 * 60 * 60 * 1000; // раз в 4 часа
+let autoUpdater = null;
+let manualCheckInProgress = false;
+
+// Журнал обновлений — userData/updates.log (удобно для диагностики).
+function logUpdate(message) {
+  const line = `[${new Date().toISOString()}] ${message}\n`;
+  try {
+    const file = path.join(app.getPath('userData'), 'updates.log');
+    let prev = '';
+    try {
+      prev = fs.readFileSync(file, 'utf8');
+    } catch {}
+    if (prev.length > 200000) prev = prev.slice(-100000);
+    fs.writeFileSync(file, prev + line, 'utf8');
+  } catch {}
+}
+
+async function checkForUpdates(manual) {
+  if (!autoUpdater) {
+    if (manual) {
+      dialog.showMessageBox({
+        type: 'info',
+        title: 'VaskoTick',
+        message: 'Проверка обновлений доступна только в установленной версии.',
+      });
+    }
+    return;
+  }
+  manualCheckInProgress = manual;
+  try {
+    await autoUpdater.checkForUpdates();
+  } catch (err) {
+    // Событие 'error' тоже сработает — там и лог, и диалог для ручной проверки.
+    logUpdate(`ошибка проверки: ${err && err.message ? err.message : err}`);
+  }
+}
+
+function setupAutoUpdates() {
+  if (!app.isPackaged) return; // в dev-режиме обновляться нечему
+  try {
+    ({ autoUpdater } = require('electron-updater'));
+  } catch (err) {
+    logUpdate(`electron-updater не загрузился: ${err && err.message ? err.message : err}`);
+    return;
+  }
+
+  autoUpdater.autoDownload = true; // скачиваем сразу, спрашиваем только о перезапуске
+  autoUpdater.autoInstallOnAppQuit = true; // «Позже» = установится при следующем выходе
+
+  autoUpdater.on('checking-for-update', () => logUpdate('проверка обновлений…'));
+  autoUpdater.on('update-available', (info) => {
+    logUpdate(`найдена версия ${info.version}, скачиваю`);
+    if (manualCheckInProgress) {
+      dialog.showMessageBox({
+        type: 'info',
+        title: 'VaskoTick',
+        message: `Найдена новая версия ${info.version}.`,
+        detail: 'Скачиваю в фоне — когда будет готова, предложу перезапустить.',
+      });
+    }
+    manualCheckInProgress = false;
+  });
+  autoUpdater.on('update-not-available', () => {
+    logUpdate('обновлений нет');
+    if (manualCheckInProgress) {
+      dialog.showMessageBox({
+        type: 'info',
+        title: 'VaskoTick',
+        message: `У вас последняя версия — ${app.getVersion()}.`,
+      });
+    }
+    manualCheckInProgress = false;
+  });
+  autoUpdater.on('error', (err) => {
+    logUpdate(`ошибка: ${err && err.message ? err.message : err}`);
+    if (manualCheckInProgress) {
+      dialog.showMessageBox({
+        type: 'error',
+        title: 'VaskoTick',
+        message: 'Не удалось проверить обновления.',
+        detail: 'Проверьте подключение к интернету или попробуйте позже.',
+      });
+    }
+    manualCheckInProgress = false;
+  });
+  autoUpdater.on('update-downloaded', (info) => {
+    logUpdate(`версия ${info.version} скачана, предлагаю перезапуск`);
+    const choice = dialog.showMessageBoxSync({
+      type: 'info',
+      title: 'VaskoTick',
+      message: `Обновление ${info.version} готово.`,
+      detail:
+        'Перезапустить сейчас и установить? Если выбрать «Позже», ' +
+        'обновление установится при следующем выходе из приложения.',
+      buttons: ['Перезапустить сейчас', 'Позже'],
+      defaultId: 0,
+      cancelId: 1,
+    });
+    if (choice === 0) {
+      isQuitting = true; // иначе перехват 'close' не даст окну закрыться
+      autoUpdater.quitAndInstall();
+    }
+  });
+
+  // Первая проверка — через 15 секунд после запуска, дальше — каждые 4 часа.
+  setTimeout(() => checkForUpdates(false), 15000);
+  setInterval(() => checkForUpdates(false), UPDATE_CHECK_INTERVAL_MS);
 }
 
 const TRAY_ICON_DATA_URL = 'data:image/png;base64,' + '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';
@@ -170,6 +283,7 @@ if (!gotLock) {
 
     createWindow();
     createTray();
+    setupAutoUpdates();
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) createWindow();
