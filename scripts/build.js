@@ -7,6 +7,7 @@ const { version } = require('../package.json');
 
 builder
   .build({
+    publish: 'never', // публикацию делает GitHub Actions, не сам builder
     targets: builder.Platform.WINDOWS.createTarget(),
     config: {
       appId: 'com.vasko.tick',
