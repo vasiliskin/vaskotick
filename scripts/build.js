@@ -3,6 +3,7 @@
 /* Сборка дистрибутивов (portable + NSIS) через API electron-builder. */
 
 const builder = require('electron-builder');
+const { version } = require('../package.json');
 
 builder
   .build({
@@ -18,14 +19,14 @@ builder
         icon: 'assets/icon.ico',
       },
       portable: {
-        artifactName: 'VaskoTick-1.2.0-Portable.exe',
+        artifactName: `VaskoTick-${version}-Portable.exe`,
       },
       nsis: {
         oneClick: false,
         perMachine: false,
         allowToChangeInstallationDirectory: true,
         shortcutName: 'VaskoTick',
-        artifactName: 'VaskoTick-1.2.0-Setup.exe',
+        artifactName: `VaskoTick-${version}-Setup.exe`,
       },
     },
   })
