@@ -1,6 +1,6 @@
 'use strict';
 
-const { app, BrowserWindow, ipcMain, dialog, Tray, Menu, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, Tray, Menu, nativeImage } = require('electron');
 const fs = require('fs');
 const path = require('path');
 
@@ -39,6 +39,13 @@ function buildTrayMenu() {
   }
   items.push({ type: 'separator' });
   items.push({ label: 'Показать окно', click: showWindow });
+  items.push({
+    label: 'О программе',
+    click: () => {
+      showWindow();
+      if (mainWindow) mainWindow.webContents.send('app:about');
+    },
+  });
   items.push({ label: 'Проверить обновления…', click: () => checkForUpdates(true) });
   items.push({
     label: 'Выход',
@@ -274,6 +281,13 @@ if (!gotLock) {
 
     /* Версия приложения для отображения в интерфейсе */
     ipcMain.handle('app:version', () => app.getVersion());
+
+    /* Открытие внешних ссылок в браузере (только https/mailto) */
+    ipcMain.handle('app:open-external', (_event, url) => {
+      if (typeof url === 'string' && /^(https:\/\/|mailto:)/i.test(url)) {
+        shell.openExternal(url);
+      }
+    });
 
     /* Автозапуск с Windows (только для установленной/portable-сборки) */
     ipcMain.handle('autostart:get', () => {

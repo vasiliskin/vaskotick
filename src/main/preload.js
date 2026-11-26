@@ -10,6 +10,10 @@ contextBridge.exposeInMainWorld('tt', {
   getAutostart: () => ipcRenderer.invoke('autostart:get'),
   setAutostart: (enabled) => ipcRenderer.invoke('autostart:set', enabled),
   getVersion: () => ipcRenderer.invoke('app:version'),
+  openExternal: (url) => ipcRenderer.invoke('app:open-external', url),
+  onAbout: (callback) => {
+    ipcRenderer.on('app:about', () => callback());
+  },
   onTimerCommand: (callback) => {
     ipcRenderer.on('timer:command', (_event, cmd) => callback(cmd));
   },

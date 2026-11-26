@@ -501,6 +501,26 @@ function renderReports() {
   body.innerHTML = html;
 }
 
+/* Полная очистка истории сессий (проекты и задачи остаются) */
+async function clearReport() {
+  const n = state.sessions.length;
+  if (!n) {
+    toast('История уже пуста');
+    return;
+  }
+  const ok = await confirmModal(
+    'Очистить историю?',
+    `Все записи сессий (${n} ${plural(n, 'запись', 'записи', 'записей')}) будут удалены безвозвратно. ` +
+    'Проекты и задачи останутся, но их затреканное время обнулится.',
+    'Очистить',
+    true
+  );
+  if (!ok) return;
+  state.sessions = [];
+  saveAndRender();
+  toast('История очищена');
+}
+
 /* ---------- Рендер: всё ---------- */
 function renderAll() {
   renderProjects();
@@ -518,7 +538,7 @@ function saveAndRender() {
 }
 
 /* ---------- Модалки ---------- */
-function openModal({ title, bodyHTML, okText = 'Сохранить', danger = false }) {
+function openModal({ title, bodyHTML, okText = 'Сохранить', danger = false, hideCancel = false }) {
   return new Promise((resolve) => {
     const root = $('#modal-root');
     root.innerHTML = `
@@ -527,7 +547,7 @@ function openModal({ title, bodyHTML, okText = 'Сохранить', danger = fa
           <h3>${esc(title)}</h3>
           <div class="modal-body">${bodyHTML}</div>
           <div class="modal-actions">
-            <button class="btn btn-ghost" data-modal-cancel>Отмена</button>
+            ${hideCancel ? '' : '<button class="btn btn-ghost" data-modal-cancel>Отмена</button>'}
             <button class="btn ${danger ? '' : 'btn-primary'}" ${danger ? 'style="background:var(--red);border-color:var(--red);color:#fff"' : ''} data-modal-ok>${esc(okText)}</button>
           </div>
         </div>
@@ -541,10 +561,32 @@ function openModal({ title, bodyHTML, okText = 'Сохранить', danger = fa
     };
     document.addEventListener('keydown', onKey, true);
     backdrop.addEventListener('mousedown', (e) => { if (e.target === backdrop) close(null); });
-    $('[data-modal-cancel]', root).addEventListener('click', () => close(null));
+    const cancelBtn = $('[data-modal-cancel]', root);
+    if (cancelBtn) cancelBtn.addEventListener('click', () => close(null));
     $('[data-modal-ok]', root).addEventListener('click', () => close($('.modal-body', root)));
     const firstInput = $('input, textarea', root);
     if (firstInput) { firstInput.focus(); firstInput.select(); }
+  });
+}
+
+/* ---------- О программе ---------- */
+async function aboutModal() {
+  let version = 'dev';
+  if (isElectron && typeof window.tt.getVersion === 'function') {
+    version = 'v' + (await window.tt.getVersion());
+  }
+  openModal({
+    title: 'О программе',
+    okText: 'Закрыть',
+    hideCancel: true,
+    bodyHTML: `
+      <div class="about">
+        <div class="about-name">VaskoTick <span class="about-version">${esc(version)}</span></div>
+        <p class="modal-text">Учёт рабочего времени: проекты, задачи, таймер, отчёты.</p>
+        <p class="modal-text">Автор: <strong>Vasily Ryabchikov</strong></p>
+        <p class="modal-text"><a href="https://github.com/vasiliskin/vaskotick" data-external>github.com/vasiliskin/vaskotick</a></p>
+        <p class="modal-text"><a href="mailto:vasiliskin@gmail.com" data-external>vasiliskin@gmail.com</a></p>
+      </div>`,
   });
 }
 
@@ -612,6 +654,22 @@ function bindEvents() {
   $('#btn-add-project').addEventListener('click', addProject);
   $('#btn-add-task').addEventListener('click', addTask);
   $('#btn-export').addEventListener('click', exportTxt);
+  $('#btn-clear-report').addEventListener('click', clearReport);
+  $('#app-version').addEventListener('click', aboutModal);
+
+  /* Внешние ссылки из модалок — открываем в браузере, а не в окне приложения */
+  $('#modal-root').addEventListener('click', (e) => {
+    const a = e.target.closest('a[data-external]');
+    if (!a) return;
+    e.preventDefault();
+    if (isElectron && typeof window.tt.openExternal === 'function') window.tt.openExternal(a.href);
+    else window.open(a.href, '_blank', 'noopener');
+  });
+
+  /* Открытие «О программе» из меню трея */
+  if (isElectron && typeof window.tt.onAbout === 'function') {
+    window.tt.onAbout(() => aboutModal());
+  }
 
   $$('.tab').forEach((tab) => tab.addEventListener('click', () => {
     ui.view = tab.dataset.view;

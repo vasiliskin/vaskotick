@@ -33,6 +33,12 @@ body { display: flex; flex-direction: column; }
 
 button { font-family: inherit; }
 
+/* ===== Полосы прокрутки (тонкие, в палитре приложения) ===== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #3a3f4c; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
 /* ===== Шапка ===== */
 .app-header {
   display: flex;
@@ -57,8 +63,11 @@ button { font-family: inherit; }
   font-size: 12px;
   font-weight: 400;
   color: var(--text-dim);
-  user-select: none;
+  cursor: pointer;
+  transition: color 150ms ease-out;
 }
+.app-version:hover { color: var(--accent); }
+.app-version::after { content: 'ⓘ'; margin-left: 5px; font-size: 11px; }
 
 .tabs { display: flex; gap: 4px; flex: 1; }
 
@@ -399,6 +408,12 @@ button { font-family: inherit; }
 
 .modal .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
 .modal .modal-text { font-size: 14px; line-height: 1.6; }
+
+/* ===== О программе ===== */
+.about-name { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.about-version { color: var(--accent); font-weight: 600; }
+.modal a { color: var(--accent); text-decoration: none; }
+.modal a:hover { text-decoration: underline; }
 
 /* ===== Тосты ===== */
 .toast-root {
