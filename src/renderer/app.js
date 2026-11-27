@@ -390,7 +390,8 @@ function renderTasks() {
   list.innerHTML = pTasks.map((t) => {
     const isActive = runningId === t.id;
     const isPaused = isActive && state.timer.paused;
-    const total = taskTotalMs(t.id);
+    // Общее время задачи = сохранённые сессии + идущий таймер (даже на паузе)
+    const total = taskTotalMs(t.id) + (isActive ? timerElapsedMs() : 0);
     const nSessions = sessionsOf(t.id).filter((s) => !s.manual).length;
 
     const cardClass = isActive ? (isPaused ? 'task-card paused-task' : 'task-card running') : 'task-card';
@@ -464,7 +465,9 @@ function renderReports() {
   for (const p of state.projects) {
     const pTasks = tasksOf(p.id);
     const rows = pTasks.map((t) => {
-      const sum = sessions.filter((s) => s.taskId === t.id).reduce((a, s) => a + s.durationMs, 0);
+      // Сумма по задаче = сохранённые сессии за период + идущий таймер (даже на паузе)
+      const sum = sessions.filter((s) => s.taskId === t.id).reduce((a, s) => a + s.durationMs, 0)
+        + (state.timer && state.timer.taskId === t.id ? timerElapsedMs() : 0);
       return { name: t.name, sum };
     }).filter((r) => r.sum !== 0);
     const pTotal = rows.reduce((a, r) => a + r.sum, 0);
@@ -481,7 +484,19 @@ function renderReports() {
 
   const sorted = [...sessions].sort((a, b) => b.start - a.start).slice(0, 100);
   html += '<h3 class="sessions-title">Сессии за период</h3>';
-  if (!sorted.length) {
+  // Идущая сейчас сессия — отдельной строкой, чтобы отчёт сходился с карточкой задачи
+  if (state.timer) {
+    const t = getTask(state.timer.taskId);
+    if (t) {
+      html += `<div class="session-row">
+        <span class="when">сейчас</span>
+        <span class="what">${esc(taskLabel(t.id))}</span>
+        <span class="note">${state.timer.paused ? 'Пауза' : 'Идёт'}</span>
+        <span class="dur">+${fmtHMS(timerElapsedMs())}</span>
+      </div>`;
+    }
+  }
+  if (!sorted.length && !state.timer) {
     html += '<p class="empty-hint">За выбранный период сессий нет.</p>';
   } else {
     html += sorted.map((s) => {
